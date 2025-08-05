@@ -1,23 +1,42 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import Signup from "./pages/login/Signup";
+import Login from "./pages/login/Login";
+import Home from "./pages/Home";
+import "./App.css";
+import Messages from "./pages/messages/Messages";
+import Bookmark from "./pages/bookmark/Bookmark";
+import Lists from "./pages/lists/Lists";
+import Profile from "./pages/profile/Profile";
+import More from "./pages/more/More";
+import Feed from "./pages/feed/Feed";
+import Explore from "./pages/explore/Explore";
+import Notifications from "./pages/notifications/Notifications";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />}>
+            <Route index element={<Feed />} />
+          </Route>
+          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/home" element={<Home />}>
+            <Route path="feed" element={<Feed />} />
+            <Route path="explore" element={<Explore />} />
+            <Route path="notification" element={<Notifications />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="bookmarks" element={<Bookmark />} />
+            <Route path="lists" element={<Lists />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="more" element={<More />} />
+          </Route>
+        </Routes>
+        x
+      </BrowserRouter>
     </div>
   );
 }
