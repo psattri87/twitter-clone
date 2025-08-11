@@ -3,9 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import twitterImage from "../../image/twitterLoginImage.jpg";
 import { FaTwitter } from "react-icons/fa";
 import GoogleButton from "react-google-button";
-
+import { useUserAuth } from "../../context/UserAuthContext";
 import "./Login.css";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 const Signup = () => {
   const [userName, setUserName] = useState("");
@@ -14,6 +13,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { signUp, googleSignIn } = useUserAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -21,18 +21,30 @@ const Signup = () => {
     setError("");
     setLoading(true);
     try {
+      await signUp(email, password);
       const user = {
         userName: userName,
         name: name,
         email: email,
         password: password,
       };
-      // Simulate a signup process
-      console.log("User signed up with:", { userName, email, password });
-      // Here you would typically call your backend API to create a new user
-      // After successful signup, navigate to the login page
+      fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(user),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.acknowledged) {
+            console.log(data);
+            navigate("/");
+          }
+        });
       setLoading(false);
     } catch (error) {
+      setLoading(false)
       setError(error.message);
       window.alert(error.message);
     }
@@ -41,7 +53,7 @@ const Signup = () => {
   const handleGoogleSignIn = async (e) => {
     e.preventDefault();
     try {
-      // Simulate Google sign-in process
+      await googleSignIn();
       navigate("/");
     } catch (error) {
       setError(error.message);
@@ -106,20 +118,11 @@ const Signup = () => {
               >
                 Sign Up
               </button>
+              {loading && <p>Loading...</p>}
             </form>
             <p className="text-red-500">{error}</p>
             <div className="mt-6">
-            <GoogleButton type="light" onClick={handleGoogleSignIn} />
-              {/* <GoogleOAuthProvider clientId="46184417202-a7unfsef6n1eavh6ho173ikkdh7p46r0.apps.googleusercontent.com">
-                <GoogleLogin
-                  onSuccess={(credentialResponse) => {
-                    console.log(credentialResponse);
-                  }}
-                  onError={() => {
-                    console.log("Login Failed");
-                  }}
-                />
-              </GoogleOAuthProvider> */}
+              <GoogleButton type="light" onClick={handleGoogleSignIn} />
             </div>
           </div>
         </div>

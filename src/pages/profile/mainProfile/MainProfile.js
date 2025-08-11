@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserAuth } from "../../../context/UserAuthContext";
 import {
   ArrowBack,
   CenterFocusWeak,
@@ -11,8 +12,9 @@ import Post from "../posts/Posts";
 import EditProfile from "../editProfile/EditProfile";
 import "./MainProfile.css";
 
-const MainProfile = ({ user }) => {
+const MainProfile = () => {
   const navigate = useNavigate();
+  const {user} = useUserAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [loggedinuser] = useState([
     {
@@ -54,7 +56,7 @@ const MainProfile = ({ user }) => {
   return (
     <div>
       <div className="flex items-center gap-4 m-4">
-        <ArrowBack className="" onclick={() => navigate("/")} />
+        <ArrowBack className="" onClick={() => navigate("/")} />
         <h4 className="text-xl font-bold text-[#444]">{username}</h4>
       </div>
       <div className="">
@@ -65,7 +67,7 @@ const MainProfile = ({ user }) => {
                 src={
                   loggedinuser[0]?.profileImage
                     ? loggedinuser[0].profileImage
-                    : "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
+                    : user && user.photoURL
                 }
                 className=" w-full h-full object-fit"
                 alt="cover_image"

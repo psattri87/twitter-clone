@@ -22,17 +22,30 @@ import CustomLink from "./CustomLink";
 import SidebarOption from "./SidebarOption";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserAuth } from "../../context/UserAuthContext";
+import useLoggedinUser from "../../hooks/useLoggedinUser";
 
-const Sidebar = (handleLogout, user) => {
+const Sidebar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
-  const logedinUser = {};
+  const [loggedinUser] = useLoggedinUser();
+  const {user, logOut} = useUserAuth();
   const navigate = useNavigate();
+  console.log("sidebar rendered");
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      window.alert("Logout successful");
+      navigate("/login");
+    } catch (error) {
+      window.alert("Logout failed. Please try again.");
+    }
   };
   const result = user?.email?.split("@")[0];
   return (
@@ -72,20 +85,20 @@ const Sidebar = (handleLogout, user) => {
       <div className="profile__info mt-10">
         <Avatar
           src={
-            logedinUser[0]?.profileImage
-              ? logedinUser[0]?.name
-              : user && user.displayName
+            loggedinUser[0]?.profileImage
+              ? loggedinUser[0]?.profileImage
+              : user && user.photoURL
           }
-          alt={user?.name}
+          alt="profile_image"
         />
       </div>
       <div className="user__info subUser__info">
         <div>
-          <h4>
-            {logedinUser[0]?.name
-              ? logedinUser[0].name
+          {/* <h4>
+            {loggedinUser[0]?.name
+              ? loggedinUser[0].name
               : user && user.displayName}
-          </h4>
+          </h4> */}
           <h5>@{result}</h5>
         </div>
         <IconButton
@@ -111,8 +124,8 @@ const Sidebar = (handleLogout, user) => {
           >
             <Avatar
               src={
-                logedinUser[0]?.profileImage
-                  ? logedinUser[0].profileImage
+                loggedinUser[0]?.profileImage
+                  ? loggedinUser[0].profileImage
                   : user && user.photoURL
               }
               alt={user?.name}
@@ -120,11 +133,11 @@ const Sidebar = (handleLogout, user) => {
 
             <div className="user__info subUser__info">
               <div>
-                <h4>
+                {/* <h4>
                   {logedinUser[0]?.name
                     ? logedinUser[0].name
                     : user && user.displayName}
-                </h4>
+                </h4> */}
                 <h5>@{result}</h5>
               </div>
               <ListItemIcon className="done__icon" color="blue">

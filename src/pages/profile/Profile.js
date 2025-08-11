@@ -9,7 +9,7 @@ const Profile = () => {
   };
   return (
     <div className='profilePage'>
-      <MainProfile user={user} />
+      <MainProfile />
     </div>
   )
 }

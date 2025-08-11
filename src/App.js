@@ -12,18 +12,20 @@ import More from "./pages/more/More";
 import Feed from "./pages/feed/Feed";
 import Explore from "./pages/explore/Explore";
 import Notifications from "./pages/notifications/Notifications";
+import { UserAuthContextProvider } from "./context/UserAuthContext";
 
 function App() {
   return (
     <div className="app">
+      <UserAuthContextProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />}>
             <Route index element={<Feed />} />
           </Route>
           <Route path="/" element={<Home />} />
-          <Route path="/" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/home" element={<Home />}>
             <Route path="feed" element={<Feed />} />
             <Route path="explore" element={<Explore />} />
@@ -37,6 +39,7 @@ function App() {
         </Routes>
         x
       </BrowserRouter>
+      </UserAuthContextProvider>
     </div>
   );
 }
