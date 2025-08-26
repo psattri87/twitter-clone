@@ -15,7 +15,7 @@ const Posts = ({ p }) => {
         <div className="post__header">
           <div className="post__headerText">
             <h3>
-              {name}{" "}
+              {name}
               <span className="post__headerSpecial">
                 <VerifiedUserIcon className="post__badge" />@{username}
               </span>

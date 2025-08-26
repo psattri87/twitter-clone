@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Box, Modal } from "@mui/material";
-import {Button} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import "./EditProfile.css";
+import useLoggedinUser from "../../../hooks/useLoggedinUser";
 
 const style = {
   position: "absolute",
@@ -19,7 +19,7 @@ const style = {
   borderRadius: 8,
 };
 
-function Editchild({ dob, setdob }) {
+const Editchild = ({ dob, setdob })=> {
   const [open, setopen] = useState(false);
   const handleopen = () => {
     setopen(true);
@@ -64,32 +64,42 @@ function Editchild({ dob, setdob }) {
   );
 }
 
-const Editprofile = ({ user, loggedinuser }) => {
-  const [name, setname] = useState("");
-  const [bio, setbio] = useState("");
-  const [location, setlocation] = useState("");
-  const [website, setwebsite] = useState("");
+const Editprofile = ({ user, handleUpdateUserProfile }) => {
+  const [loggedinUser, setLoggedinUser] = useLoggedinUser();
+  const [name, setname] = useState(loggedinUser?.name ? loggedinUser.name : "");
+  const [bio, setbio] = useState(loggedinUser?.bio ? loggedinUser.bio : "");
+  const [location, setlocation] = useState(loggedinUser?.location ? loggedinUser.location : "");
+  const [website, setwebsite] = useState(loggedinUser?.website ? loggedinUser.website : "");
   const [open, setopen] = useState(false);
   const [dob, setdob] = useState("");
+  const email = user?.email || loggedinUser?.email;
+
   const handlesave = () => {
     const editinfo = {
+      email:email,
       name,
       bio,
       location,
       website,
       dob,
     };
-    fetch(`http://localhost:5000/userupdate/${user?.email}`, {
-      method: "PATCH",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(editinfo),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("done", data);
-      });
+    const updatedUser = handleUpdateUserProfile(editinfo);
+    if (updatedUser) {
+      setLoggedinUser(updatedUser);
+      setopen(false);
+      console.log("Profile updated successfully:", updatedUser);
+    }
+    // fetch(`http://localhost:5000/user/${editinfo.email}`, {
+    //   method: "PATCH",
+    //   headers: {
+    //     "content-type": "application/json",
+    //   },
+    //   body: JSON.stringify(editinfo),
+    // })
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     console.log("done", data);
+    //   });
   };
   return (
     <div>
@@ -124,7 +134,8 @@ const Editprofile = ({ user, loggedinuser }) => {
               id="fullWidth"
               variant="filled"
               onChange={(e) => setname(e.target.value)}
-              deafultValue={loggedinuser[0]?.name ? loggedinuser[0].name : ""}
+              value={name}
+              // defaultValue={loggedinUser?.name ? loggedinUser?.name : ""}
             />
             <TextField
               className="text-field"
@@ -133,7 +144,8 @@ const Editprofile = ({ user, loggedinuser }) => {
               id="fullWidth"
               variant="filled"
               onChange={(e) => setbio(e.target.value)}
-              deafultValue={loggedinuser[0]?.bio ? loggedinuser[0].bio : ""}
+              // deafultValue={loggedinUser?.bio ? loggedinUser.bio : ""}
+              value={bio}
             />
             <TextField
               className="text-field"
@@ -142,9 +154,10 @@ const Editprofile = ({ user, loggedinuser }) => {
               id="fullWidth"
               variant="filled"
               onChange={(e) => setlocation(e.target.value)}
-              deafultValue={
-                loggedinuser[0]?.location ? loggedinuser[0].location : ""
-              }
+              // deafultValue={
+              //   loggedinUser?.location ? loggedinUser.location : ""
+              // }
+              value={location}
             />
             <TextField
               className="text-field"
@@ -153,9 +166,10 @@ const Editprofile = ({ user, loggedinuser }) => {
               id="fullWidth"
               variant="filled"
               onChange={(e) => setwebsite(e.target.value)}
-              deafultValue={
-                loggedinuser[0]?.website ? loggedinuser[0].website : ""
-              }
+              // deafultValue={
+              //   loggedinUser?.website ? loggedinUser.website : ""
+              // }
+              value={website}
             />
           </form>
           <div className="birthdate-section">
@@ -164,8 +178,8 @@ const Editprofile = ({ user, loggedinuser }) => {
             <Editchild dob={dob} setdob={setdob} />
           </div>
           <div className="last-section">
-            {loggedinuser[0]?.dob ? (
-              <h2>{loggedinuser[0]?.dob}</h2>
+            {loggedinUser?.dob ? (
+              <h2>{loggedinUser?.dob}</h2>
             ) : (
               <h2>{dob ? dob : "Add your date of birth"}</h2>
             )}

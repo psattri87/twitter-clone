@@ -17,27 +17,21 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
     try {
+      setLoading(true);
       await login(email, password);
       navigate("/");
-
-      // const user = {
-      //   userName: userName,
-      //   password: password,
-      // };
-      // Simulate a Log in process
       setLoading(false);
     } catch (error) {
       setError(error.message);
       window.alert(error.message);
+      setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async (e) => {
     e.preventDefault();
     try {
-      // Simulate Google sign-in process
       await googleSignIn();
       navigate("/");
     } catch (error) {
@@ -65,8 +59,8 @@ const Login = () => {
               type="text"
               placeholder="Phone, email or username"
               className="border-2 rounded-full p-2"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
             <input
@@ -88,6 +82,7 @@ const Login = () => {
           <div className="mt-6">
             <GoogleButton type="light" onClick={handleGoogleSignIn} />
           </div>
+          <div className="mt-5 text-gray-700">Don't have an account? <span className="text-sky-600 hover:underline cursor-pointer " onClick={()=>{navigate("/signup")}}>Sign up</span></div>
         </div>
       </div>
     </div>

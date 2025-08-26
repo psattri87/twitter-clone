@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import Signup from "./pages/login/Signup";
 import Login from "./pages/login/Login";
 import Home from "./pages/Home";
@@ -37,7 +36,6 @@ function App() {
             <Route path="more" element={<More />} />
           </Route>
         </Routes>
-        x
       </BrowserRouter>
       </UserAuthContextProvider>
     </div>

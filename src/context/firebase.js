@@ -1,8 +1,7 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
-
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAcEkUloqpq_CCTOk4V9Z04Xwa5TLLPaAo",
   authDomain: "twitter-71dde.firebaseapp.com",
@@ -18,4 +17,3 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 export default app;
-// const analytics = getAnalytics(app);

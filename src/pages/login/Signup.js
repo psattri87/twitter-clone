@@ -25,10 +25,9 @@ const Signup = () => {
       const user = {
         userName: userName,
         name: name,
-        email: email,
-        password: password,
+        email: email
       };
-      fetch("http://localhost:5000/register", {
+      fetch("http://localhost:5000/user", {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -38,14 +37,14 @@ const Signup = () => {
         .then((res) => res.json())
         .then((data) => {
           if (data.acknowledged) {
-            console.log(data);
+            console.log("User created successfully"+data);
             navigate("/");
           }
         });
       setLoading(false);
     } catch (error) {
-      setLoading(false)
       setError(error.message);
+      setLoading(false)
       window.alert(error.message);
     }
   };
@@ -124,6 +123,7 @@ const Signup = () => {
             <div className="mt-6">
               <GoogleButton type="light" onClick={handleGoogleSignIn} />
             </div>
+            <div className="mt-5 text-gray-700">Have an account already? <span className="text-sky-600 hover:underline cursor-pointer " onClick={()=>{navigate("/login")}}>Log in</span> </div>
           </div>
         </div>
       </div>

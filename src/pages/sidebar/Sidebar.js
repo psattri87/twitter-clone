@@ -1,4 +1,3 @@
-import React, { use } from "react";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
@@ -22,32 +21,21 @@ import CustomLink from "./CustomLink";
 import SidebarOption from "./SidebarOption";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUserAuth } from "../../context/UserAuthContext";
 import useLoggedinUser from "../../hooks/useLoggedinUser";
 
-const Sidebar = () => {
+const Sidebar = ({user, handleLogout}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
   const [loggedinUser] = useLoggedinUser();
-  const {user, logOut} = useUserAuth();
   const navigate = useNavigate();
-  console.log("sidebar rendered");
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      window.alert("Logout successful");
-      navigate("/login");
-    } catch (error) {
-      window.alert("Logout failed. Please try again.");
-    }
-  };
-  const result = user?.email?.split("@")[0];
+  
+  const userName = user?.email?.split("@")[0];
   return (
     <div className="sidebar">
       <TwitterIcon className="sidebar__twitterIcon" />
@@ -99,7 +87,7 @@ const Sidebar = () => {
               ? loggedinUser[0].name
               : user && user.displayName}
           </h4> */}
-          <h5>@{result}</h5>
+          <h5>@{userName}</h5>
         </div>
         <IconButton
           size="small"
@@ -133,12 +121,12 @@ const Sidebar = () => {
 
             <div className="user__info subUser__info">
               <div>
-                {/* <h4>
-                  {logedinUser[0]?.name
-                    ? logedinUser[0].name
+                <h4>
+                  {loggedinUser[0]?.name
+                    ? loggedinUser[0].name
                     : user && user.displayName}
-                </h4> */}
-                <h5>@{result}</h5>
+                </h4>
+                {/* <h5>@{userName}</h5> */}
               </div>
               <ListItemIcon className="done__icon" color="blue">
                 <DoneIcon fontSize="small" />
@@ -152,11 +140,11 @@ const Sidebar = () => {
           >
             Add an existing account
           </MenuItem>
+          {userName ?
           <MenuItem
             onClick={handleLogout}
-          >
-            Log out @ {result}
-          </MenuItem>
+          >Log out @{userName}</MenuItem> : <MenuItem onClick={()=>navigate("/login")}>Log in</MenuItem>
+          }
         </Menu>
       </div>
     </div>

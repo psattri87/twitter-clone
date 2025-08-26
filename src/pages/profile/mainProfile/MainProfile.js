@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserAuth } from "../../../context/UserAuthContext";
 import {
@@ -9,49 +9,112 @@ import {
   AddLink,
 } from "@mui/icons-material";
 import Post from "../posts/Posts";
-import EditProfile from "../editProfile/EditProfile";
+import Editprofile from "../editProfile/EditProfile";
 import "./MainProfile.css";
+import axios from "axios";
+import useLoggedinUser from "../../../hooks/useLoggedinUser";
 
 const MainProfile = () => {
   const navigate = useNavigate();
-  const {user} = useUserAuth();
+  const { user } = useUserAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [loggedinuser] = useState([
-    {
-      profileImage: "",
-      coverImage: "",
-    },
-  ]);
-  const [name, setName] = useState(user?.name || "User Name");
+  const [loggedinUser, setLoggedinUser] = useLoggedinUser();
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [postData, setPostData] = useState([]);
+  const email = loggedinUser?.email || user?.email;
   const username = user?.email?.split("@")[0];
-  const [post, setPost] = useState([]);
 
-  const data = [
-    {
-      _id: "1",
-      name: "Jane Doe",
-      username: "jane_doe",
-      profilePhoto: "https://example.com/profiles/jane.jpg",
-      post: "Exploring the new features in JavaScript! 🚀 #coding #JavaScript",
-      photo: "https://example.com/posts/javascript.png",
-    },
-    {
-      _id: "2",
-      name: "John Smith",
-      username: "johnsmith",
-      profilePhoto: "https://example.com/profiles/john.jpg",
-      post: "Just finished a great workout session! 💪 #fitness #health",
-      photo: "https://example.com/posts/workout.png",
-    },
-    {
-      _id: "3",
-      name: "Alice Johnson",
-      username: "alicejohnson",
-      profilePhoto: "https://example.com/profiles/alice.jpg",
-      post: "Loving the new features in CSS! #webdevelopment #design",
-      photo: "https://example.com/posts/css.png",
-    },
-  ];
+  async function createImageUrl(image) {
+    if (!image) return;
+    const formData = new FormData();
+    formData.set("image", image);
+    const response = await fetch(
+      "https://api.imgbb.com/1/upload?key=ba1e4b1eb6d58c95105558cf0aac4b51",
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+    const data = await response.json().then((data) => data);
+    console.log("Image upload response data:", data.data);
+    if(data.success){
+      console.log("Image URL:", data.data.display_url);
+      return data.data.display_url;
+    }
+  }
+
+  const handleUploadImage = async (e) => {
+    setIsLoading(true);
+    const url = await createImageUrl(e.target.files[0]);
+    if (!url) {
+      console.log("Image upload failed");
+      setIsLoading(false);
+      return;
+    }
+    if (e.target.id === "coverImage") {
+      const result = handleUpdateUserProfile({ email: email, coverImage: url });
+      if (result) {
+        setIsLoading(false);
+        setCoverImageUrl(url);
+      }
+    } else if (e.target.id === "profileImage") {
+      const result = handleUpdateUserProfile({
+        email: email,
+        profileImage: url,
+      });
+      if (result) {
+        setIsLoading(false);
+        setProfileImageUrl(url);
+      }
+    }
+  };
+
+  async function handleUpdateUserProfile(updatedUser) {
+    if (!updatedUser?.email) return;
+    console.log("Updating user profile with data:", updatedUser);
+    try {
+      const response = await axios.patch(
+        `http://localhost:5000/user?email=${updatedUser.email}`,
+
+        updatedUser
+      );
+      const data = await response.data;
+      if (data.acknowledged) {
+        console.log("Profile updated successfully:", data);
+        return data;
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  }
+
+  function fetchAllPosts() {
+    fetch("http://localhost:5000/post", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setPostData(data);
+      });
+  }
+
+  useEffect(() => {
+    fetchAllPosts();
+    // update profile when userProfile state changes
+    if (!email) return;
+    axios
+      .get(`http://localhost:5000/user?email=${email}`)
+      .then((response) => {
+        setLoggedinUser(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+  }, [email, setLoggedinUser]);
 
   return (
     <div>
@@ -62,58 +125,75 @@ const MainProfile = () => {
       <div className="">
         <div className="">
           <div className="profileContainer">
-            <div className="h-[200px] w-full overflow-hidden relative">
+            <div className="h-[200px] w-full overflow-hidden relative bg-slate-300">
               <img
                 src={
-                  loggedinuser[0]?.profileImage
-                    ? loggedinuser[0].profileImage
-                    : user && user.photoURL
+                  coverImageUrl !== ""
+                    ? coverImageUrl
+                    : loggedinUser?.coverImage
+                    ? loggedinUser.coverImage
+                    : user && user.photo
                 }
-                className=" w-full h-full object-fit"
+                className="h-full object-fit "
                 alt="cover_image"
+                width={"600"}
               />
               <div className="absolute top-0 left-0 h-full w-full bg-gray-600 flex justify-center items-center opacity-0 hover:opacity-80">
                 <div className="ml-10">
-                  <label htmlFor="image" className="">
+                  <label htmlFor="coverImage" className="">
                     {isLoading ? (
                       <LockReset className="photoIcon" />
                     ) : (
                       <CenterFocusWeak className="photoIcon" />
                     )}
                   </label>
-                  <input type="file" id="image" className="imageInput" />
+                  <input
+                    type="file"
+                    id="coverImage"
+                    className="imageInput"
+                    onChange={handleUploadImage}
+                  />
                 </div>
               </div>
             </div>
             <div className="relative mt-[-80px] left-[20px] h-[150px] w-[150px] border-4 border-solid border-white rounded-full overflow-hidden">
               <img
                 src={
-                  loggedinuser[0]?.profileImage
-                    ? loggedinuser[0].profileImage
-                    : "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
+                  profileImageUrl !== ""
+                    ? profileImageUrl
+                    : loggedinUser?.profileImage
+                    ? loggedinUser?.profileImage
+                    : user && user.photoURL
                 }
                 alt="profile_image"
+                className="w-full h-full object-fit"
               />
               <div className="hoverAvatarImage">
                 <div className="imageIcon_tweetButton">
-                  <label htmlFor="image" className="imageIcon">
+                  <label htmlFor="profileImage" className="imageIcon">
                     {isLoading ? (
                       <LockReset className="photoIcon photoIconDisabled" />
                     ) : (
                       <CenterFocusWeak className="photoIcon" />
                     )}
                   </label>
-                  <input type="file" id="image" className="imageInput" />
+                  <input
+                    type="file"
+                    id="profileImage"
+                    className="imageInput"
+                    onChange={handleUploadImage}
+                  />
                 </div>
               </div>
             </div>
             <div className="editProfileContainer">
-                {/* className="text-[var(--twitter-color)] font-bold border-2 border-[var(--twitter-color)] px-4 py-2 rounded-3xl hover:bg-[var(--twitter-color)] hover:text-white cursor-pointer transition-all duration-300" */}
-              <div >
-                <EditProfile user={user} loggedinuser={loggedinuser} />
+              <div>
+                <Editprofile
+                  user={user}
+                  handleUpdateUserProfile={handleUpdateUserProfile}
+                />
               </div>
             </div>
-
             <div className="userInfo">
               <div>
                 <h3 className="heading-3 capitalize font-bold">
@@ -124,26 +204,26 @@ const MainProfile = () => {
             <div className="userInfo">
               <div>
                 <h3 className="heading-3">
-                  {loggedinuser[0]?.name
-                    ? loggedinuser[0].name
+                  {loggedinUser?.name
+                    ? loggedinUser.name
                     : user && user.displayName}
                 </h3>
                 <p className="usernameSection">@{username}</p>
               </div>
             </div>
             <div className="infoContainer">
-              {loggedinuser[0]?.bio ? <p>{loggedinuser[0].bio}</p> : ""}
+              {loggedinUser?.bio ? <p>{loggedinUser.bio}</p> : ""}
               <div className="locationAndLink">
-                {loggedinuser[0]?.location ? (
+                {loggedinUser?.location ? (
                   <p className="suvInfo">
-                    <MyLocation /> {loggedinuser[0].location}
+                    <MyLocation /> {loggedinUser.location}
                   </p>
                 ) : (
                   ""
                 )}
-                {loggedinuser[0]?.website ? (
+                {loggedinUser?.website ? (
                   <p className="subInfo link">
-                    <AddLink /> {loggedinuser[0].website}
+                    <AddLink /> {loggedinUser.website}
                   </p>
                 ) : (
                   ""
@@ -153,7 +233,7 @@ const MainProfile = () => {
             <h4 className="tweetsText">Tweets</h4>
             <hr />
           </div>
-          {data.map((item) => (
+          {postData.map((item) => (
             <Post key={item._id} p={item} />
           ))}
         </div>
